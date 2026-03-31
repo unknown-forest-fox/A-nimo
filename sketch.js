@@ -100,7 +100,7 @@ sentAngry = false;
 }
 
 function playYouTube() {
-  window.open("https://www.youtube.com/watch?v=6EEW-9NDM5k&list=RD6EEW-9NDM5k&start_radio=1");
+  window.open("https://www.youtube.com/watch?v=6EEW-9NDM5k&list=RD6EEW-9NDM5k&start_radio=1", "_blank");
 }
 
 // ─── CLASSIFICATION ──────────────────────
