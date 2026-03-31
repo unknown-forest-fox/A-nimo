@@ -93,7 +93,9 @@ lastSecond = millis();
     sentAngry = true;
     if (!youtubeOpened) {
       youtubeOpened = true;
-      window.location.href = "https://www.youtube.com/watch?v=6EEW-9NDM5k&list=RD6EEW-9NDM5k&start_radio=1";
+       setTimeout(() => {
+    window.location.href = "https://www.youtube.com/watch?v=6EEW-9NDM5k&list=RD6EEW-9NDM5k&start_radio=1";
+  }, 500); // wait 500ms for fetch to complete first
     }
   }
 
