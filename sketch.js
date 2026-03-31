@@ -15,6 +15,7 @@ let sentAngry = false;
 
 // timing control
 let lastSecond = 0;
+let youtubeOpened = false;
 
 // ─── PRELOAD ─────────────────────────────
 function preload() {
@@ -87,20 +88,20 @@ lastSecond = millis();
 }
 
 // send messages
-if (timer === 0 && !sentAngry) {
-sendToESP("angry");
-sentAngry = true;
-  playYoutube();
-}
+  if (timer === 0 && !sentAngry) {
+    sendToESP("angry");
+    sentAngry = true;
+    if (!youtubeOpened) {
+      youtubeOpened = true;
+      window.location.href = "https://www.youtube.com/watch?v=6EEW-9NDM5k&list=RD6EEW-9NDM5k&start_radio=1";
+    }
+  }
 
-if (timer > 6 && sentAngry) {
-sendToESP("happy");
-sentAngry = false;
-}
-}
-
-function playYouTube() {
-  window.open("https://www.youtube.com/watch?v=6EEW-9NDM5k&list=RD6EEW-9NDM5k&start_radio=1", "_blank");
+  if (timer > 6 && sentAngry) {
+    sendToESP("happy");
+    sentAngry = false;
+    youtubeOpened = false;
+  }
 }
 
 // ─── CLASSIFICATION ──────────────────────
