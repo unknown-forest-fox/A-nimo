@@ -39,43 +39,6 @@ void handleNotFound() {
   server.send(404, "text/plain", "Not found");
 }
 
-void handleRoot() {
-  String html = "";
-  html += "<!DOCTYPE html><html><head>";
-  html += "<meta charset='utf-8'>";
-  html += "<title>Focus Tracker</title>";
-  html += "<script src='https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js'></scr";
-  html += "ipt>";
-  html += "<script src='https://unpkg.com/ml5@0.12.2/dist/ml5.min.js'></scr";
-  html += "ipt>";
-  html += "<style>body{margin:0;background:black;display:flex;justify-content:center;}</style>";
-  html += "</head><body><scr";
-  html += "ipt>";
-  html += "let esp8266IP=location.hostname;";
-  html += "let classifier,video,label='Loading...',timer=10,sentAngry=false,lastSecond=0;";
-  html += "let imageModelURL='https://teachablemachine.withgoogle.com/models/QVSDb3EHD/';";
-  html += "function preload(){classifier=ml5.imageClassifier(imageModelURL+'model.json');}";
-  html += "function setup(){createCanvas(320,260);video=createCapture(VIDEO);video.size(320,240);video.hide();classifyVideo();}";
-  html += "function sendToESP(msg){fetch('http://'+esp8266IP+'/'+msg).then(r=>r.text()).then(d=>console.log('ESP:',d)).catch(e=>console.error(e));}";
-  html += "function draw(){";
-  html += "background(0);push();translate(width,0);scale(-1,1);image(video,0,0);pop();";
-  html += "fill(255);textAlign(CENTER);textSize(16);text(label,width/2,height-4);";
-  html += "let bw=map(timer,0,10,0,width);";
-  html += "fill(timer>6?color(0,200,0):color(255,50,50));rect(0,height-20,bw,6);";
-  html += "textSize(12);fill(255);text('focus: '+timer,width/2,height-22);";
-  html += "if(millis()-lastSecond>1000){";
-  html += "if(label==='Distracted'){if(timer>0)timer--;}else{if(timer<10)timer++;}";
-  html += "lastSecond=millis();}";
-  html += "if(timer===0&&!sentAngry){sendToESP('angry');sentAngry=true;}";
-  html += "if(timer>6&&sentAngry){sendToESP('happy');sentAngry=false;}}";
-  html += "function classifyVideo(){classifier.classify(video,gotResult);}";
-  html += "function gotResult(e,r){if(e){console.error(e);return;}label=r[0].label;classifyVideo();}";
-  html += "</scr";
-  html += "ipt></body></html>";
-  server.sendHeader("Access-Control-Allow-Origin", "*");
-  server.send(200, "text/html", html);
-}
-
 // ─── SETUP ────────────────────────────────────────────────────
 void setup() {
   Serial.begin(9600);
@@ -101,8 +64,7 @@ void setup() {
   }
   Serial.println("\nIP: " + WiFi.localIP().toString());
 
-  // ─── Web Server ─────────────────────────────────────────────
-  server.on("/", handleRoot);        // must be before server.begin()
+  
   server.on("/angry", handleAngry);
   server.on("/happy", handleHappy);
   server.onNotFound(handleNotFound);
@@ -119,17 +81,15 @@ void loop() {
   if (isAngry != lastAngry) {
     lastAngry = isAngry;
     if (isAngry) {
-      yield();
       eyes.setMood(ANGRY);
-      eyes.setAutoblinker(OFF, 0, 0);
-      eyes.setIdleMode(OFF, 0, 0);
-      yield();
+      eyes.setAutoblinker(ON, 3, 2);
+      eyes.setIdleMode(ON, 3, 2);
     } else {
-      yield();
+      display1.clearDisplay();
+      display1.display();
       eyes.setMood(HAPPY);
       eyes.setAutoblinker(ON, 3, 2);
       eyes.setIdleMode(ON, 3, 2);
-      yield();
     }
   }
 
@@ -137,6 +97,8 @@ void loop() {
   unsigned long now = millis();
   if (now - lastEyeUpdate >= 16) {
     lastEyeUpdate = now;
+    server.handleClient();
+    yield();
     eyes.update();
   }
 }
