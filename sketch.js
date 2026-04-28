@@ -1,28 +1,28 @@
-
+//Java script component
+//connection to the webserver of the ESP
 let socket;
 let wsConnected = false;
 let esp8266IP = "10.104.67.2"; // your ESP8266 IP
 
-// ML5
+// ML5 component
 let classifier;
 let imageModelURL = "https://teachablemachine.withgoogle.com/models/QVSDb3EHD/";
 let video;
 let label = "Loading model...";
 
-// timer
+// timer for distraction treshold
 let timer = 10;
 let sentAngry = false;
 
 // timing control
 let lastSecond = 0;
-let youtubeOpened = false;
 
-// ─── PRELOAD ─────────────────────────────
+// preload of the classifier
 function preload() {
-classifier = ml5.imageClassifier(imageModelURL + "model.json");
+classifier = ml5.imageClassifier(imageModelURL + "model.json"); //events(distracted / Non-distracted)
 }
 
-// ─── SETUP ───────────────────────────────
+// setup
 function setup() {
 createCanvas(320, 260);
 
@@ -30,13 +30,10 @@ video = createCapture(VIDEO);
 video.size(320, 240);
 video.hide();
 
-
-
 classifyVideo();
 }
 
-
-// ─── SEND TO ESP ─────────────────────────
+// send to ESP8266 the signal/msg
 function sendToESP(msg) {
   fetch(`http://${esp8266IP}/${msg}`)
     .then(res => res.text())
@@ -45,7 +42,7 @@ function sendToESP(msg) {
 }
 
 
-// ─── DRAW ────────────────────────────────
+// draw additional information on screen
 function draw() {
 background(0);
 
@@ -57,17 +54,18 @@ image(video, 0, 0);
 pop();
 
 
-// label
+// label 
 fill(255);
 textAlign(CENTER);
 textSize(16);
 text(label, width/2, height - 4);
 
-// timer bar
+// timer bar, if timer above , its green, if below 6 then red
 let barWidth = map(timer, 0, 10, 0, width);
 fill(timer > 6 ? color(0,200,0) : color(255,50,50));
 rect(0, height - 20, barWidth, 6);
 
+//text how much the focus is
 textSize(12);
 fill(255);
 text("focus: " + timer, width/2, height - 22);
@@ -81,38 +79,29 @@ if (label === "Distracted") {
 } else {
   if (timer < 10) timer++;
 }
-
+  
 lastSecond = millis();
-
-
 }
 
-// send messages
+// send messages/signals to the ESP
   if (timer === 0 && !sentAngry) {
     sendToESP("angry");
     sentAngry = true;
-    if (!youtubeOpened) {
-      youtubeOpened = true;
-       setTimeout(() => {
-    window.open = "https://www.youtube.com/watch?v=6EEW-9NDM5k&list=RD6EEW-9NDM5k&start_radio=1";
-  }, 500); // wait 500ms for fetch to complete first
-    }
   }
 
   if (timer > 6 && sentAngry) {
     sendToESP("happy");
     sentAngry = false;
-    youtubeOpened = false;
   }
 }
 
-// ─── CLASSIFICATION ──────────────────────
+//classifying the video data
 function classifyVideo() {
 classifier.classify(video, gotResult);
 }
 
+//if there are errors when getting the result, print them
 function gotResult(error, results) {
-
 if (error) {
 console.error(error);
 return;
