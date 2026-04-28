@@ -1,17 +1,20 @@
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#include <FluxGarage_RoboEyes.h>
-#include <Adafruit_SSD1306.h>
+#include <ESP8266WiFi.h> //necessary for the wifi connection
+#include <ESP8266WebServer.h> //connection for the WebServer through ESP8266
+#include <FluxGarage_RoboEyes.h>//library for eyes
+#include <Adafruit_SSD1306.h>//libreary mandatory for the screen component
 
+//Wifi connection
 const char* ssid     = "RUC-IOT";
 const char* password = "GiHa5934La";
 
+//define the OLED interface with the reset pin
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
 
+//initialization of the OLED screen 
 Adafruit_SSD1306 display1(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-RoboEyes<Adafruit_SSD1306> eyes(display1);
+RoboEyes<Adafruit_SSD1306> eyes(display1); //defining the eyes on the screen
 
 ESP8266WebServer server(80);
 
@@ -19,7 +22,7 @@ bool isAngry = false;
 bool lastAngry = false;
 unsigned long lastEyeUpdate = 0;
 
-// ─── Handlers ─────────────────────────────────────────────────
+// for the webpage handlers
 void handleAngry() {
   isAngry = true;
   server.sendHeader("Access-Control-Allow-Origin", "*");
@@ -39,22 +42,26 @@ void handleNotFound() {
   server.send(404, "text/plain", "Not found");
 }
 
-// ─── SETUP ────────────────────────────────────────────────────
+//setup
 void setup() {
   Serial.begin(9600);
 
-  if (!display1.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+  if (!display1.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
+    //check the connection with the OLED if it cannot find it
     Serial.println("OLED not found!");
   }
-  display1.clearDisplay();
-  display1.display();
 
+  //restarting the display
+  display1.clearDisplay(); 
+  display1.display(); 
+
+  
   eyes.begin(SCREEN_WIDTH, SCREEN_HEIGHT, 100);
   eyes.setAutoblinker(ON, 3, 2);
   eyes.setIdleMode(ON, 3, 2);
   eyes.setMood(HAPPY);
 
-  // ─── WiFi ───────────────────────────────────────────────────
+  // wifi connection
   Serial.print("Connecting to WiFi");
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -62,22 +69,22 @@ void setup() {
     Serial.print(".");
     eyes.update();
   }
-  Serial.println("\nIP: " + WiFi.localIP().toString());
+  Serial.println("\nIP: " + WiFi.localIP().toString()); //print in serial monitor the IP adress of the ESP
 
-  
+  //server start
   server.on("/angry", handleAngry);
   server.on("/happy", handleHappy);
   server.onNotFound(handleNotFound);
   server.begin();
-  Serial.println("Server: http://" + WiFi.localIP().toString());
+  Serial.println("Server: http://" + WiFi.localIP().toString()); //return the server webaddress
 }
 
-// ─── LOOP ─────────────────────────────────────────────────────
+// main loop
 void loop() {
-  server.handleClient();
+  server.handleClient(); 
   yield();
 
-  // only change mood when state actually changes
+  // only change mood when event actually changes
   if (isAngry != lastAngry) {
     lastAngry = isAngry;
     if (isAngry) {
