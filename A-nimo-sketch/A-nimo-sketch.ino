@@ -100,7 +100,7 @@ void loop() {
     }
   }
 
-  // update eyes every 16ms (~60fps)
+  // update eyes every 16ms (~60fps) for a smooth animation of the eyes
   unsigned long now = millis();
   if (now - lastEyeUpdate >= 16) {
     lastEyeUpdate = now;
