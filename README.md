@@ -14,13 +14,3 @@ A-nimo is a physical desk companion designed to help you stay focused while work
 | Frontend | GitHub Pages — p5.js + ml5.js, Teachable Machine model |
 | Hardware | ESP8266 + 128×64 SSD1306 OLED, RoboEyes animations |
 | Communication | HTTP over WiFi — browser sends `/angry` and `/happy` to the ESP |
-
-## Getting started
-1. **Flash the ESP8266** — upload the Arduino sketch, update WiFi credentials, wire OLED to I2C (SDA/SCL)
-2. **Get the IP address** — open Serial Monitor at 9600 baud, the ESP prints its IP once connected
-3. **Open the web app** — visit the GitHub Pages URL, enter the ESP's IP, allow camera access, and place A-nimo on your desk
-
-## Dependencies
-**Arduino:** ESP8266WiFi, ESP8266WebServer, Adafruit_SSD1306, FluxGarage_RoboEyes  
-**Frontend:** p5.js, ml5.js, Teachable Machine  
-**Hardware:** ESP8266 board, SSD1306 128×64 OLED
